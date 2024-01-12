@@ -1,0 +1,4 @@
+#message-history {
+  display: flex;
+  flex-direction: column;
+}

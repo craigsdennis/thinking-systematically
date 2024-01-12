@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thinking Systematically</title>
+    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <script src="./vendor/vue.global.prod.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <form>
+        <select v-model="model">
+          <option v-for="model in models">{{model}}</option>
+        </select>
+        <label for="system">System Message</label>
+        <textarea id="system" v-model="systemMessage"></textarea>
+      </form>
+
+      <div id="message-history">
+        <div v-for="message in messages">
+          <div :class="message.role">{{message.content}}</div>
+        </div>
+      </div>
+
+      <form @submit.prevent="sendPrompt">
+        <label for="user">Your prompt</label>
+        <textarea id="user" v-model="userMessage"></textarea>
+        <button type="submit">🚀</button>
+      </form>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          const models = [
+            "@cf/meta/llama-2-7b-chat-int8",
+            "@cf/meta/llama-2-7b-chat-fp16",
+          ];
+          return {
+            models,
+            model: models[0],
+            messages: [],
+            systemMessage: "You are a helpful assistant.",
+            userMessage: "",
+          };
+        },
+        methods: {
+          async sendPrompt() {
+            const bodyJSON = JSON.stringify({
+              model: this.model,
+              systemMessage: this.systemMessage,
+              messages: this.messages,
+              userMessage: this.userMessage,
+            });
+            const response = await fetch("/prompt", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: bodyJSON,
+            });
+            // Append the user message to the array
+            this.messages.push({ role: "user", content: this.userMessage });
+            this.messages.push({ role: "assistant", content: "" });
+
+            const aiTokenTransform = {
+              start() {
+                this.buffer = "";
+              },
+              async transform(chunk, controller) {
+                /* `chunk` is an undefined portion of entries in this format 
+                data: {"response": "Hello "}
+
+                data: {"response": "World"}
+
+                data: [DONE]
+                */
+               // Entries are actually delimited by two newlines
+                const lines = chunk.split("\n");
+                if (this.buffer.length > 0) {
+                  // Prepend the line with the previous buffer
+                  lines[0] = this.buffer + lines[0];
+                }
+                // Last line is either `""` or half of an entry, so store that as the buffer for next time
+                this.buffer = lines.pop();
+                lines
+                  .filter((line) => line.length > 1)
+                  .forEach((line) => {
+                    const json = line.replace(/^data: /, "");
+                    try {
+                      const token = JSON.parse(json).response;
+                      // Sends the transformed value to the stream
+                      console.debug("Sending token:", token);
+                      controller.enqueue(token);
+                    } catch (err) {
+                      if (json !== "[DONE]") {
+                        console.error(`Invalid JSON: ${json}`);
+                      }
+                    }
+                  });
+              },
+            };
+
+            class AiTokenStream extends TransformStream {
+              constructor() {
+                super({ ...aiTokenTransform });
+              }
+            }
+            const reader = response.body
+              .pipeThrough(new TextDecoderStream())
+              .pipeThrough(new AiTokenStream())
+              .getReader();
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) {
+                console.log("Stream done");
+                break;
+              }
+              this.messages[this.messages.length - 1].content += value;
+            }
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
