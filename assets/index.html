@@ -6,6 +6,7 @@
     <title>Thinking Systematically</title>
     <link href="/css/main.css" rel="stylesheet" type="text/css" />
     <script src="./vendor/vue.global.prod.js"></script>
+    <script src="./vendor/markdown-it.min.js"></script>
   </head>
   <body>
     <div id="app">
@@ -19,7 +20,7 @@
 
       <div id="message-history">
         <div v-for="message in messages">
-          <div :class="message.role">{{message.content}}</div>
+          <div :class="message.role" v-html="$markdown(message.content)"></div>
         </div>
       </div>
 
@@ -33,7 +34,7 @@
     <script>
       const { createApp } = Vue;
 
-      createApp({
+      const app = createApp({
         data() {
           const models = [
             "@cf/meta/llama-2-7b-chat-int8",
@@ -120,7 +121,17 @@
             }
           },
         },
-      }).mount("#app");
+      });
+      const markdownPlugin = {
+        install(app, options) {
+          const md = new window['markdownit']();
+          app.config.globalProperties.$markdown = (source) => {
+            return md.render(source);
+          }
+        }
+      }
+      app.use(markdownPlugin);
+      app.mount("#app");
     </script>
   </body>
 </html>
