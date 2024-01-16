@@ -8,5 +8,3 @@ wrangler.toml
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-
-assets/vendor/*
