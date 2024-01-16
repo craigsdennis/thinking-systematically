@@ -12,7 +12,31 @@
   </head>
   <body>
     <div id="app">
-      <form>
+
+      <div class="settings-panel">
+        <h2>Settings</h2>
+        <label for="modelSelect">Model:</label>
+        <select id="modelSelect" v-model="model">
+          <option v-for="model in models">{{model}}</option>
+        </select>
+
+        <label for="systemMessage">System Message:</label>
+        <textarea id="systemMessage" v-model="systemMessage"></textarea>
+    </div>
+    <div class="chat-container">
+        <div class="messages" v-for="message in messages">
+            <!-- Dynamically loaded chat messages will be here -->
+            <!-- Example Chat Messages -->
+            <div class="message" :class="message.role + '-message'" v-html="$markdown(message.content)"></div>
+        </div>
+        <div class="input-container">
+          <form @submit.prevent="sendPrompt">
+            <input type="text" v-model="userMessage" placeholder="Type a new message..." id="newMessage" />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+    </div>
+      <!-- <form>
         <select v-model="model">
           <option v-for="model in models">{{model}}</option>
         </select>
@@ -31,7 +55,7 @@
         <textarea id="user" v-model="userMessage"></textarea>
         <button type="submit">🚀</button>
       </form>
-    </div>
+    </div> -->
 
     <script>
       const { createApp } = Vue;
@@ -58,6 +82,10 @@
               messages: this.messages,
               userMessage: this.userMessage,
             });
+            // Append the user message to the array
+            this.messages.push({ role: "user", content: this.userMessage });
+            this.messages.push({ role: "assistant", content: "" });
+            // TODO: clear the prompt
             const response = await fetch("/prompt", {
               method: "POST",
               headers: {
@@ -65,9 +93,6 @@
               },
               body: bodyJSON,
             });
-            // Append the user message to the array
-            this.messages.push({ role: "user", content: this.userMessage });
-            this.messages.push({ role: "assistant", content: "" });
 
             function makeAiTokenStream() {
               return new TransformStream({
