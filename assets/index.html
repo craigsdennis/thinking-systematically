@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thinking Systematically</title>
     <link href="/css/main.css" rel="stylesheet" type="text/css" />
-    <script src="./vendor/vue.global.prod.js"></script>
-    <script src="./vendor/markdown-it.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.14/vue.global.prod.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   </head>
   <body>
@@ -36,27 +36,6 @@
           </form>
         </div>
     </div>
-      <!-- <form>
-        <select v-model="model">
-          <option v-for="model in models">{{model}}</option>
-        </select>
-        <label for="system">System Message</label>
-        <textarea id="system" v-model="systemMessage"></textarea>
-      </form>
-
-      <div id="message-history">
-        <div v-for="message in messages">
-          <div :class="message.role" v-html="$markdown(message.content)"></div>
-        </div>
-      </div>
-
-      <form @submit.prevent="sendPrompt">
-        <label for="user">Your prompt</label>
-        <textarea id="user" v-model="userMessage"></textarea>
-        <button type="submit">🚀</button>
-      </form>
-    </div> -->
-
     <script>
       const { createApp } = Vue;
 

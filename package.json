@@ -1,9 +1,7 @@
 {
   "scripts": {
-    "build": "copyfiles -f node_modules/vue/dist/vue.global.prod.js assets/vendor/ && copyfiles -f node_modules/markdown-it/dist/markdown-it.min.js assets/vendor/",
-    "postinstall": "npm run build",
-    "dev": "npm run build && wrangler dev src/index.js --assets ./assets",
-    "deploy": "npm run build && wrangler deploy --minify src/index.js --assets ./assets"
+    "dev": "wrangler dev src/index.js --assets ./assets",
+    "deploy": "wrangler deploy --minify src/index.js --assets ./assets"
   },
   "dependencies": {
     "@cloudflare/ai": "^1.0.47",
@@ -11,9 +9,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
-    "copyfiles": "^2.4.1",
-    "markdown-it": "^14.0.0",
-    "vue": "^3.4.11",
     "wrangler": "^3.22.0"
   }
 }
