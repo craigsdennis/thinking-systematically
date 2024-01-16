@@ -8,7 +8,6 @@ const app = new Hono();
 
 app.get("/", serveStatic({ root: "./index.html" }));
 app.get("/css/*", serveStatic({ root: "./css/" }));
-app.get("/vendor/*", serveStatic({ root: "./vendor/" }));
 
 app.get("/hono", (c) => {
   return c.text("Hello Hono!");

@@ -32,7 +32,7 @@
         <div class="input-container">
           <form @submit.prevent="sendPrompt">
             <input type="text" v-model="userMessage" placeholder="Type a new message..." id="newMessage" />
-            <button type="submit">Send</button>
+            <button type="submit" :disabled="chatDisabled">Send</button>
           </form>
         </div>
     </div>
@@ -51,10 +51,12 @@
             messages: [],
             systemMessage: "You are a helpful assistant.",
             userMessage: "",
+            chatDisabled: false,
           };
         },
         methods: {
           async sendPrompt() {
+            this.chatDisabled = true;
             const bodyJSON = JSON.stringify({
               model: this.model,
               systemMessage: this.systemMessage,
@@ -64,7 +66,8 @@
             // Append the user message to the array
             this.messages.push({ role: "user", content: this.userMessage });
             this.messages.push({ role: "assistant", content: "" });
-            // TODO: clear the prompt
+            // Clear the prompt
+            this.userMessage = "";
             const response = await fetch("/prompt", {
               method: "POST",
               headers: {
@@ -121,6 +124,7 @@
               const { value, done } = await reader.read();
               if (done) {
                 console.log("Stream done");
+                this.chatDisabled = false;
                 hljs.highlightAll();
                 break;
               }
