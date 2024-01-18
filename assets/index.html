@@ -44,6 +44,7 @@
               id="newMessage"
             />
             <button type="submit" :disabled="chatDisabled">Send</button>
+            <button class="secondary" @click.prevent="resetChat" v-if="messages.length > 1">Reset Chat</button>
           </form>
         </div>
       </div>
@@ -56,6 +57,8 @@
           const models = [
             "@cf/meta/llama-2-7b-chat-int8",
             "@cf/meta/llama-2-7b-chat-fp16",
+            "@cf/mistral/mistral-7b-instruct-v0.1	",
+            "@hf/thebloke/codellama-7b-instruct-awq",
           ];
           return {
             models,
@@ -67,6 +70,9 @@
           };
         },
         methods: {
+          async resetChat() {
+            this.messages = [];
+          },
           async sendPrompt() {
             this.chatDisabled = true;
             const bodyJSON = JSON.stringify({
