@@ -44,7 +44,13 @@
               id="newMessage"
             />
             <button type="submit" :disabled="chatDisabled">Send</button>
-            <button class="secondary" @click.prevent="resetChat" v-if="messages.length > 1">Reset Chat</button>
+            <button
+              class="secondary"
+              @click.prevent="resetChat"
+              v-if="messages.length > 1"
+            >
+              Reset Chat
+            </button>
           </form>
         </div>
       </div>
