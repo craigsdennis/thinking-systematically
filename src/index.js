@@ -1,11 +1,9 @@
-import { Ai } from '@cloudflare/ai';
+import { Ai } from "@cloudflare/ai";
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
 import { serveStatic } from "hono/cloudflare-workers";
 
-import {EventSourceParserStream} from 'eventsource-parser/stream'
-
-
+import { EventSourceParserStream } from "eventsource-parser/stream";
 
 const app = new Hono();
 
@@ -25,17 +23,22 @@ app.post("/prompt", async (c) => {
     ...body.messages,
     { role: "user", content: body.userMessage },
   ];
-  console.log(`Sending messages: ${JSON.stringify(messages)} to ${body.model}....`);
-  const eventSourceStream = await ai.run(body.model, { messages, stream: true });
+  console.log(
+    `Sending messages: ${JSON.stringify(messages)} to ${body.model}....`
+  );
+  const eventSourceStream = await ai.run(body.model, {
+    messages,
+    stream: true,
+  });
   // Since I am not sending back an EventSource stream, I'll just stream back text
   const tokenStream = eventSourceStream
     .pipeThrough(new TextDecoderStream())
     .pipeThrough(new EventSourceParserStream());
 
   return streamText(c, async (stream) => {
-    for await(const msg of tokenStream) {
-        const data = JSON.parse(msg.data);
-        stream.write(data.response);
+    for await (const msg of tokenStream) {
+      const data = JSON.parse(msg.data);
+      stream.write(data.response);
     }
   });
 });
