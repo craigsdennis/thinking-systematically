@@ -100,49 +100,8 @@
               body: bodyJSON,
             });
 
-            function makeAiTokenStream() {
-              return new TransformStream({
-                start() {
-                  this.buffer = "";
-                },
-                async transform(chunk, controller) {
-                  /* `chunk` is an undefined portion of entries in this format 
-                data: {"response": "Hello "}
-
-                data: {"response": "World"}
-
-                data: [DONE]
-                */
-                  // Entries are actually delimited by two newlines
-                  const lines = chunk.split("\n");
-                  if (this.buffer.length > 0) {
-                    // Prepend the line with the previous buffer
-                    lines[0] = this.buffer + lines[0];
-                  }
-                  // Last line is either `""` or half of an entry, so store that as the buffer for next time
-                  this.buffer = lines.pop();
-                  lines
-                    .filter((line) => line.length > 1)
-                    .forEach((line) => {
-                      const json = line.replace(/^data: /, "");
-                      try {
-                        const token = JSON.parse(json).response;
-                        // Sends the transformed value to the stream
-                        console.debug("Sending token:", token);
-                        controller.enqueue(token);
-                      } catch (err) {
-                        if (json !== "[DONE]") {
-                          console.error(`Invalid JSON: ${json}`);
-                        }
-                      }
-                    });
-                },
-              });
-            }
-
             const reader = response.body
               .pipeThrough(new TextDecoderStream())
-              .pipeThrough(makeAiTokenStream())
               .getReader();
             while (true) {
               const { value, done } = await reader.read();
