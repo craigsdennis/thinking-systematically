@@ -9,3 +9,4 @@
 - [ ] 🤑 Sure but...
 - [ ] 🤖 What is the model good at already?
 - [ ] 💃🕺 Personalization
+- [ ] ✊ Don't stop believing
